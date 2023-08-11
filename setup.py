@@ -16,10 +16,10 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/leandrocm86/easypush-python/issues"
     },
     license='MIT',
-    packages=['easypush'],
+    py_modules=['easypush', 'easypush_cli'],
     entry_points={
         'console_scripts': [
-            'easypush=easypush.easypush_cli:main'
+            'easypush=easypush_cli:main'
         ]
     },
     install_requires=[],

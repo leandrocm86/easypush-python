@@ -22,26 +22,26 @@ EasyPush's Python module and client can easily be installed via pip (python3 and
 ```
 pip install easypush
 ```
-This way, you can launch it with the *easypush* command, or integrate it directly with you own python scripts by importing the *easypush* module.
+This way, you can launch it with the *easypush* command, or integrate it directly with your own python scripts by importing the *easypush* module.
 
 #### EasyPush is also available for PCs with Java (Windows/Linux/Mac) and phones with Android.
-Java's CLI client and library: https://github.com/leandrocm86/easypush-cli/
+Java's CLI client and library: https://github.com/leandrocm86/easypush-cli/<br>
 Desktop (GUI) client: https://github.com/leandrocm86/easypush/<br>
 Android client: Download  the [app on GooglePlay](https://play.google.com/store/apps/details?id=lcm.easypush), or check the [project on github](https://github.com/leandrocm86/easypush-android)<br>
 All projects are free, open sourced and open to suggestions.
 
 #### Usage:
-EasyPush's Python CLI client can be used in two ways: sender mode and reader mode.<br>
+EasyPush's Python CLI client can be used in two ways: sender mode and listener mode.<br>
 Sender mode: **easypush send \<IPs\>@\<PORT\> \<message\>** <br>
 Example:
 ```
 easypush send 192.168.0.255@1050 'Hello world!'
 ```
-On Sender mode, clients with the IPs informed (comma separated) will receive the text if they are listening on the port informed. Consider using a broadcast IP if you have many devices or if you don't know their addresses. <br>
+On Sender mode, the client(s) with the IP(s) informed (comma separated) will receive the text if listening on the given port. Consider using a broadcast IP if you have many devices or if you don't know their addresses. <br>
 
 Receiver mode: **easypush listen \<PORT\>  [--timeout MILLISECONDS]** <br>
 Example:
 ```
 easypush listen 1050
 ```
-On listener mode, EasyPush will print to standard output every text received on the port informed, until a termination by the user. You can also set the optional "--timeout" parameter so the listener will wait for a given time and stop if no message arrives.<br>
+On listener mode, EasyPush will print to standard output every text received on the port informed, until a termination by the user. You can also set the optional "--timeout" parameter so the listener will wait for a single message for at most the given time and stop if no message arrives.<br>

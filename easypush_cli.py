@@ -1,5 +1,5 @@
 import argparse
-from . import easypush
+import easypush
 import sys
 import signal
 from socket import timeout
