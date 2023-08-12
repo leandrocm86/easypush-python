@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='easypush',
-    version='1.0',
+    version='1.1',
     author='Leandro Medeiros',
     author_email='leandrocm86@gmail.com',
     description='Python module and client for EasyPush - a serverless utility to share text between devices.',

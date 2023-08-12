@@ -25,14 +25,15 @@ EasyPush can be used in two modes: sender and listener.
 
 - Listen mode:
     For receiving messages, the first parameter is 'listen'.
-    The second parameter is the UDP port to listen on.
-    There's an optional '-t' or '--timeout' parameter.
-    Easypush quits if no message arrives before a timeout.
-    If given no timeout, EasyPush keeps listening until terminated.
+    It must be followed by the UDP port number to listen on.
+    By default, easypush waits for a message and terminates.
+    The optional '-t/--timeout' parameter limits the wait in millis.
+    The optional '-k/--keep-alive' flag is to keep listening.
 
     Examples of using EasyPush for listening to messages:
-    easypush listen 1050  # Prints all messages coming on port 1050.
-    easypush listen 1050 -t 1000  # Waits for a message for 1s max.
+    easypush listen 1050  # Gets 1st message on port 1050 and exits.
+    easypush listen 1050 -t 2000  # Waits for at most 2 secs.
+    easypush listen 1050 -k  # Prints all messages coming on 1050.
 
 ====================================================================
     '''
@@ -47,8 +48,9 @@ def main():
     sender_parser.add_argument('MESSAGE', type=str, help='Text to be sent to the recipients.')
 
     listener_parser = subparsers.add_parser('listen')
-    listener_parser.add_argument('PORT', type=int, help='UDP port to listen on.')
-    listener_parser.add_argument('-t', '--timeout', type=int, default=0, help='Timeout in milliseconds for quitting if no message arrives.')
+    listener_parser.add_argument('PORT_NUMBER', type=int, help='UDP port to listen on.')
+    listener_parser.add_argument('-t', '--timeout', type=int, default=0, help='Timeout for quitting, in milliseconds.')
+    listener_parser.add_argument('-k', '--keep-alive', action='store_true', help='Flag for not stopping at the first message, but to keep listening.')
 
     args = parser.parse_args()
 
@@ -67,6 +69,7 @@ def main():
         recipients = ips.split(',')
         int_port = parse_port(port)
         easypush.send(recipients, int_port, args.MESSAGE)
+
     elif args.mode == 'listen':
 
         def handle_shutdown(signal, frame):
@@ -75,24 +78,19 @@ def main():
 
         signal.signal(signal.SIGTERM, handle_shutdown)
 
-        def listen():
+        print('[EASYPUSH] Starting to listen on port', args.PORT)
+
+        while True:
             try:
                 msg = easypush.listen(parse_port(args.PORT), args.timeout)
                 print('[EASYPUSH] Received message:', msg)
+                if args.keep_alive:
+                    continue
             except KeyboardInterrupt:
                 print("[EASYPUSH] Interrupted by user.")
-                sys.exit(0)
-
-        if args.timeout:
-            try:
-                print('[EASYPUSH] Waiting for message on port', args.PORT)
-                listen()
             except timeout:
                 print('[EASYPUSH] Timeout reached for listener.')
-        else:
-            print('[EASYPUSH] Starting to listen on port', args.PORT)
-            while True:
-                listen()
+            sys.exit(0)
 
 
 if __name__ == "__main__":
