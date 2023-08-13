@@ -78,11 +78,11 @@ def main():
 
         signal.signal(signal.SIGTERM, handle_shutdown)
 
-        print('[EASYPUSH] Starting to listen on port', args.PORT)
+        print('[EASYPUSH] Starting to listen on port', args.PORT_NUMBER)
 
         while True:
             try:
-                msg = easypush.listen(parse_port(args.PORT), args.timeout)
+                msg = easypush.listen(parse_port(args.PORT_NUMBER), args.timeout)
                 print('[EASYPUSH] Received message:', msg)
                 if args.keep_alive:
                     continue
