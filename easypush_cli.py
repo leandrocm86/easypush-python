@@ -7,41 +7,45 @@ from socket import timeout
 DESCRIPTION = \
     '''
 ====================================================================
-                            EasyPush
+                            Easypush
 
-EasyPush can be used in two modes: sender and listener.
+Easypush can be used in two modes: sender and listener.
 
 - Send mode:
-    To send messages, the first parameter must be 'send'.
-    The second parameter is for recipient(s) in 'IP@PORT' format.
+    To send messages, the first command must be 'send'.
+    The next parameter is for recipient(s) in 'IP@PORT' format.
     There can be multiple IPs separated by comma.
     IPs can be IPv4 or IPv6 and can also be bradcast IPs.
     There can be only a single destination UDP port.
     The third and last parameter is the text to be sent.
 
-    Examples of using EasyPush for sending messages:
+    Examples of using Easypush for sending messages:
     easypush send 192.168.0.10@1050 'Hello World!'
     easypush send 10.0.0.1,10.0.0.255@1050 'Hello Worlds!'
 
 - Listen mode:
-    For receiving messages, the first parameter is 'listen'.
+    For receiving messages, the first command is 'listen'.
     It must be followed by the UDP port number to listen on.
     By default, easypush waits for a message and terminates.
     The optional '-t/--timeout' parameter limits the wait in millis.
     The optional '-k/--keep-alive' flag is to keep listening.
 
-    Examples of using EasyPush for listening to messages:
-    easypush listen 1050  # Gets 1st message on port 1050 and exits.
-    easypush listen 1050 -t 2000  # Waits for at most 2 secs.
-    easypush listen 1050 -k  # Prints all messages coming on 1050.
+    Examples of using Easypush for listening to messages:
+    easypush listen 1050  # Get first message on port 1050 and exit.
+    easypush listen 1050 -t 2000  # Quit if no message comes in 2s.
+    easypush listen 1050 -k  # Print all messages coming on 1050.
 
 ====================================================================
     '''
 
 
+def out(msg: str):
+    print(f'[EASYPUSH] {msg}', flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter)
-    subparsers = parser.add_subparsers(dest='mode', required=True)
+    subparsers = parser.add_subparsers(dest='mode', required=True, title='mode command')
 
     sender_parser = subparsers.add_parser('send')
     sender_parser.add_argument('RECIPIENTS', type=str, help='IP(s) and port of recipients in "IPs@PORT" format. Comma separated if multiple IPs.')
@@ -73,24 +77,29 @@ def main():
     elif args.mode == 'listen':
 
         def handle_shutdown(signal, frame):
-            print("[EASYPUSH] System shutting down.")
+            out("Shutdown signaled! Terminating...")
             sys.exit(0)
 
         signal.signal(signal.SIGTERM, handle_shutdown)
 
-        print('[EASYPUSH] Starting to listen on port', args.PORT_NUMBER)
+        out(f'Starting to listen on port {args.PORT_NUMBER}')
 
         while True:
             try:
                 msg = easypush.listen(parse_port(args.PORT_NUMBER), args.timeout)
-                print('[EASYPUSH] Received message:', msg)
+                out('Received message: ' + msg)
                 if args.keep_alive:
                     continue
             except KeyboardInterrupt:
-                print("[EASYPUSH] Interrupted by user.")
+                out("Interrupted by user.")
             except timeout:
-                print('[EASYPUSH] Timeout reached for listener.')
-            sys.exit(0)
+                out('Timeout reached for listener.')
+            except OSError as e:
+                if e.errno == 98:
+                    out('Port seems to be already in use!')
+                else:
+                    raise e
+            break
 
 
 if __name__ == "__main__":
